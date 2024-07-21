@@ -18,7 +18,7 @@ def resize_crop(img, h, w):
     return img
 
 
-def correct_filename(filename, default='jpg'):
+def correct_filename(filename, default='png'):
     # Список поддерживаемых расширений
     supported = {ex[1:] for ex, f 
                  in Image.registered_extensions().items() 
@@ -31,6 +31,15 @@ def correct_filename(filename, default='jpg'):
     else:
         # Если с названием файла все в порядке
         return filename
+
+
+def open_img(image_name):
+    if isinstance(image_name, str):
+        return Image.open(f'input/{image_name}')
+    elif isinstance(image_name, Image.Image):
+        return image_name
+    else:
+        assert False, 'Image must be defined as int, str or Image!'
         
 
 def get_vertices(gs):
@@ -58,10 +67,7 @@ def color_blur(image_name,
                output_name='output', 
                grayscale=[0.2126, 0.7152, 0.0722], 
                test_mode=False):
-    if isinstance(image_name, str):
-        image = Image.open(f'input/{image_name}')
-    else:
-        image = image_name
+    image = open_img(image_name)
     resolution = np.sqrt(np.prod(image.size))
     blur_radius = blur_factor * resolution / 2
     blured = image.filter(ImageFilter.GaussianBlur(blur_radius))
@@ -69,6 +75,20 @@ def color_blur(image_name,
                      target=image, 
                      output_name=output_name, 
                      grayscale=grayscale, 
+                     test_mode=test_mode)
+
+
+def illumination(image_name,
+                 intensity=0.9,
+                 color=[0, 0, 255],
+                 output_name='output',
+                 test_mode=False):
+    image = open_img(image_name)
+    color = list(256 - np.array(color))
+    return transform(image_name=image, 
+                     target=1 - intensity, 
+                     output_name=output_name, 
+                     grayscale=color, 
                      test_mode=test_mode)
 
 
@@ -82,10 +102,7 @@ def transform(image_name,
     gs = gs / gs.sum()
     
     # Загрузка и обработка исходного изображения
-    if isinstance(image_name, str):
-        image = Image.open(f'input/{image_name}')
-    else:
-        image = image_name
+    image = open_img(image_name)
     if test_mode: # Уменьшение картинки для тестового режима
         test_mode = 100 if isinstance(test_mode, bool) else test_mode
         new_w = np.sqrt(np.divide(*image.size)) * test_mode
@@ -98,15 +115,12 @@ def transform(image_name,
     if isinstance(target, float):
         t = target
         t_index = np.full((h, w), round(t * 255))
-    elif isinstance(target, str) or isinstance(target, Image.Image):
-        if isinstance(target, str):
-            target = Image.open(f'input/{target}')
+    else:
+        target = open_img(target)
         target = resize_crop(target, h, w)
         target_np = np.array(target)[..., :3] / 255
         t = target_np.reshape((h, w, 1, 3)) @ gs.T
         t_index = np.round(t.reshape(h, w) * 255).astype(int)
-    else:
-        assert False, 'Type of target must be int, str or Image!'
         
     # Массив из цветов исходного изображения
     colors = image_np.reshape((h, w, 1, 3))
