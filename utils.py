@@ -39,7 +39,7 @@ def open_img(image_name):
     elif isinstance(image_name, Image.Image):
         return image_name
     else:
-        assert False, 'Image must be defined as int, str or Image!'
+        assert False, 'Image must be defined as str or Image!'
         
 
 def get_vertices(gs):
@@ -62,11 +62,11 @@ def get_vertices(gs):
     return vertices
 
 
-def color_blur(image_name, 
-               blur_factor=0.1,
-               output_name='output', 
-               grayscale=[0.2126, 0.7152, 0.0722], 
-               test_mode=False):
+def color_blurring(image_name, 
+                   blur_factor=0.1,
+                   output_name='output', 
+                   grayscale=[0.2126, 0.7152, 0.0722], 
+                   test_mode=False):
     image = open_img(image_name)
     resolution = np.sqrt(np.prod(image.size))
     blur_radius = blur_factor * resolution / 2
@@ -79,14 +79,15 @@ def color_blur(image_name,
 
 
 def illumination(image_name,
-                 intensity=0.9,
                  color=[0, 0, 255],
+                 intensity=0.1,
                  output_name='output',
                  test_mode=False):
     image = open_img(image_name)
-    color = list(256 - np.array(color))
+    inverted_color = 255 - np.array(color)
+    color = list(np.clip(inverted_color, 1e-10, 255))
     return transform(image_name=image, 
-                     target=1 - intensity, 
+                     target=intensity, 
                      output_name=output_name, 
                      grayscale=color, 
                      test_mode=test_mode)
