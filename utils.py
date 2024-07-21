@@ -90,6 +90,7 @@ def transform(image_name,
               target=0.2,
               output_name='output',
               grayscale=[0.2126, 0.7152, 0.0722],
+              fast_mode=False,
               test_mode=False):
     """
     Основной метод для выравнивания цветов в плоскость grayscale
@@ -127,6 +128,15 @@ def transform(image_name,
         коэффициенты для преобразования в оттенки серого. 
         По умолчанию установлены наиболее часто используемые
         для этой цели коэффициенты из стандарта ITU-R BT.709
+
+    fast_mode : bool
+        переключатель быстрого режима:
+        - если False, используется стандартный алгоритм
+          преобразования цветов, изменяя их минимальным образом;
+        - если True, используется более быстрый алгоритм 
+          (примерно в 2 раза быстрее стандартного), но цвета не
+          всегда изменяются минимально возможным образом, хоть
+          картинка и слабо отличается от стандартного алгоритма.
     
     test_mode : bool или float
         переключатель для тестового режима. В тестовом режиме:
@@ -166,22 +176,33 @@ def transform(image_name,
     
     # Идеальные цвета для цели (пересечение Плоскости и нормали к ней)
     ci = gs * (t - colors @ gs.T) / (gs @ gs.T) + colors
-    
-    # Точки, полученные пересечением всех пар границ с Плоскостью
-    vertices = get_vertices(gs)[t_index]
-    
+
     # Индексы внутри RGB для рассчетов
     ks = (np.eye(6, k=-1) + np.eye(6))[..., ::2]
     # Границы (правая часть в уравнениях их плоскостей)
     alphas = np.reshape([0, 1] * 3, (6, 1))
-    # Направляющие вектора от ci к пересечениям Плоскости и границ для RGB
-    ms = np.cross(gs.flatten(), np.cross(gs.flatten(), ks))
-    # Точки, лежащие на пересечениях Плоскости и границ для RGB
-    _ksms = (ks[..., None, :] @ ms[..., None]).reshape(6, 1)
-    modas = ms * (alphas - ks @ ci.reshape((h, w, 3, 1))) / _ksms + ci
     
-    # Все варианты расположения наилучшей точки
-    options = np.concatenate([ci, vertices, modas], axis=-2)
+    if fast_mode:
+        # Точки пересечения вектора ((ci - t), ci) с границами
+        _cis = ci.repeat(6, axis=2)
+        _kci = (ks.reshape(6, 1, 3) @ _cis[..., None]).reshape(h, w, 6, 1)
+        xs = (_cis - t) * (alphas - t) / (_kci - t) + t
+        
+        # Все варианты расположения наилучшей точки
+        options = np.concatenate([ci, xs], axis=-2)
+    else:
+        # Точки, полученные пересечением всех пар границ с Плоскостью
+        vertices = get_vertices(gs)[t_index]
+        
+        # Направляющие вектора от ci к пересечениям Плоскости и границ для RGB
+        ms = np.cross(gs.flatten(), np.cross(gs.flatten(), ks))
+        # Точки, лежащие на пересечениях Плоскости и границ для RGB
+        _ksms = (ks[..., None, :] @ ms[..., None]).reshape(6, 1)
+        modas = ms * (alphas - ks @ ci.reshape((h, w, 3, 1))) / _ksms + ci
+        
+        # Все варианты расположения наилучшей точки
+        options = np.concatenate([ci, vertices, modas], axis=-2)
+    
     # Отсеивание точек за пределами 0 и 255
     _casted = np.round(options * 255)
     mask = np.any(_casted < 0, axis=-1) | np.any(_casted > 255, axis=-1)
@@ -209,7 +230,8 @@ def transform(image_name,
 def color_blurring(image_name, 
                    blur_factor=0.1,
                    output_name='output', 
-                   grayscale=[0.2126, 0.7152, 0.0722], 
+                   grayscale=[0.2126, 0.7152, 0.0722],
+                   fast_mode=False, 
                    test_mode=False):
     """
     Эффект размытия цветов
@@ -219,7 +241,7 @@ def color_blurring(image_name,
     blur_factor : float
         коэффициент размытия от 0 до 1 (но можно и больше)
 
-    image_name, output_name, grayscale, test_mode:
+    image_name, output_name, grayscale, fast_mode, test_mode:
         параметры функции transform()
     """
     image = open_img(image_name)
@@ -230,6 +252,7 @@ def color_blurring(image_name,
                      target=image, 
                      output_name=output_name, 
                      grayscale=grayscale, 
+                     fast_mode=fast_mode, 
                      test_mode=test_mode)
 
 
@@ -237,6 +260,7 @@ def illumination(image_name,
                  color=[0, 0, 255],
                  intensity=0.1,
                  output_name='output',
+                 fast_mode=False, 
                  test_mode=False):
     """
     Эффект цветного освещения
@@ -249,7 +273,7 @@ def illumination(image_name,
     intensity : float
         интенсивность остальных цветов от 0 до 1
 
-    image_name, output_name, test_mode:
+    image_name, output_name, fast_mode, test_mode:
         параметры функции transform()
     """
     image = open_img(image_name)
@@ -259,4 +283,5 @@ def illumination(image_name,
                      target=intensity, 
                      output_name=output_name, 
                      grayscale=color, 
+                     fast_mode=fast_mode, 
                      test_mode=test_mode)
