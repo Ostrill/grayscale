@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ImageFilter
 import numpy as np
 
 
@@ -53,6 +53,25 @@ def get_vertices(gs):
     return vertices
 
 
+def color_blur(image_name, 
+               blur_factor=0.1,
+               output_name='output', 
+               grayscale=[0.2126, 0.7152, 0.0722], 
+               test_mode=False):
+    if isinstance(image_name, str):
+        image = Image.open(f'input/{image_name}')
+    else:
+        image = image_name
+    resolution = np.sqrt(np.prod(image.size))
+    blur_radius = blur_factor * resolution / 2
+    blured = image.filter(ImageFilter.GaussianBlur(blur_radius))
+    return transform(image_name=blured, 
+                     target=image, 
+                     output_name=output_name, 
+                     grayscale=grayscale, 
+                     test_mode=test_mode)
+
+
 def transform(image_name,
               target=0.2,
               output_name='output',
@@ -63,9 +82,13 @@ def transform(image_name,
     gs = gs / gs.sum()
     
     # Загрузка и обработка исходного изображения
-    image = Image.open(f'input/{image_name}')
+    if isinstance(image_name, str):
+        image = Image.open(f'input/{image_name}')
+    else:
+        image = image_name
     if test_mode: # Уменьшение картинки для тестового режима
-        new_w = np.sqrt(np.divide(*image.size)) * 100
+        test_mode = 100 if isinstance(test_mode, bool) else test_mode
+        new_w = np.sqrt(np.divide(*image.size)) * test_mode
         image.thumbnail((new_w, -1))
         output_name = None
     image_np = np.array(image)[..., :3] / 255
@@ -75,14 +98,15 @@ def transform(image_name,
     if isinstance(target, float):
         t = target
         t_index = np.full((h, w), round(t * 255))
-    elif isinstance(target, str):
-        target = Image.open(f'input/{target}')
+    elif isinstance(target, str) or isinstance(target, Image.Image):
+        if isinstance(target, str):
+            target = Image.open(f'input/{target}')
         target = resize_crop(target, h, w)
         target_np = np.array(target)[..., :3] / 255
         t = target_np.reshape((h, w, 1, 3)) @ gs.T
         t_index = np.round(t.reshape(h, w) * 255).astype(int)
     else:
-        assert False, 'Type of target must be int or str!'
+        assert False, 'Type of target must be int, str or Image!'
         
     # Массив из цветов исходного изображения
     colors = image_np.reshape((h, w, 1, 3))
