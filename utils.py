@@ -3,6 +3,10 @@ import numpy as np
 
 
 def resize_crop(img, h, w):
+    """
+    Масштабирование и обрезка изображения img 
+    под переданные размеры (h, w)
+    """
     img_w, img_h = img.size
     ratio = img_w / img_h
     if ratio > (w / h):
@@ -19,6 +23,13 @@ def resize_crop(img, h, w):
 
 
 def correct_filename(filename, default='png'):
+    """
+    Исправить название сохраняемого файла filename:
+    - если в названии файла нет расширения или оно 
+      не поддерживается, добавить расширение default;
+    - если в названии файла есть расширение, и оно
+      поддерживается, оставить filename как есть
+    """
     # Список поддерживаемых расширений
     supported = {ex[1:] for ex, f 
                  in Image.registered_extensions().items() 
@@ -34,6 +45,11 @@ def correct_filename(filename, default='png'):
 
 
 def open_img(image_name):
+    """
+    Открыть изображение image_name, которое может быть
+    представлено в виде пути к файлу (str) или готового
+    изображения (Image.Image)
+    """
     if isinstance(image_name, str):
         return Image.open(f'input/{image_name}')
     elif isinstance(image_name, Image.Image):
@@ -42,9 +58,17 @@ def open_img(image_name):
         assert False, 'Image must be defined as str or Image!'
         
 
-def get_vertices(gs):
+def get_vertices(grayscale):
+    """
+    Найти все точки пересечения каждых двух смежных плоскостей-границ 
+    с плоскостью преобразования, заданной через grayscale.
+    Всего задано шесть плоскостей-границ, из которых ровно 12 смежных,
+    поэтому в результате получается 12 точек. Для каждого возможного
+    значения target (от 0 до 255) осуществляется поиск этих 12 точек,
+    и результатом является общий массив размером (256, 12, 3)
+    """
     vertices = np.zeros((256, 12, 3))
-    gs = np.array(gs).flatten()
+    gs = np.array(grayscale).flatten()
     for t in range(256):
         index = 0
         for i, j in ((0, 1), (1, 2), (0, 2)):
@@ -57,40 +81,9 @@ def get_vertices(gs):
                     try:
                         vertices[t, index] = np.linalg.solve(A, b)
                     except np.linalg.LinAlgError:
-                        vertices[t, index] = np.array([2, 2, 2])
+                        vertices[t, index] = np.array([100] * 3)
                     index += 1
     return vertices
-
-
-def color_blurring(image_name, 
-                   blur_factor=0.1,
-                   output_name='output', 
-                   grayscale=[0.2126, 0.7152, 0.0722], 
-                   test_mode=False):
-    image = open_img(image_name)
-    resolution = np.sqrt(np.prod(image.size))
-    blur_radius = blur_factor * resolution / 2
-    blured = image.filter(ImageFilter.GaussianBlur(blur_radius))
-    return transform(image_name=blured, 
-                     target=image, 
-                     output_name=output_name, 
-                     grayscale=grayscale, 
-                     test_mode=test_mode)
-
-
-def illumination(image_name,
-                 color=[0, 0, 255],
-                 intensity=0.1,
-                 output_name='output',
-                 test_mode=False):
-    image = open_img(image_name)
-    inverted_color = 255 - np.array(color)
-    color = list(np.clip(inverted_color, 1e-10, 255))
-    return transform(image_name=image, 
-                     target=intensity, 
-                     output_name=output_name, 
-                     grayscale=color, 
-                     test_mode=test_mode)
 
 
 def transform(image_name,
@@ -98,6 +91,51 @@ def transform(image_name,
               output_name='output',
               grayscale=[0.2126, 0.7152, 0.0722],
               test_mode=False):
+    """
+    Основной метод для выравнивания цветов в плоскость grayscale
+
+    PARAMETERS
+    ----------
+    image_name : str или Image.Image
+         исходное изображение:
+         - если str, то изображение с этим именем загружается
+           из папки input/;
+         - если Image.Image, то именно эта картинка берется
+           в качестве исходного изображения.
+    
+    target : float или str или Image.Image
+        цель преобразования, то естькакое значение должно 
+        получиться в ходе преобразования в оттенки серого:
+        - если float (от 0 до 1), то у каждого пикселя исходного 
+          изображения будет именно такое значение после
+          преобразование в оттенки серого;
+        - если str, то по указнному пути загружается картинка,
+          которая будет смасштабирована и обрезана по размерам
+          исходной картинки, и в таком случае у каждого пикселя
+          будет своя собственная цель (взятая с картинки target);
+        - если Image.Image, то переданная картинка по аналогии
+          с предыдущим пунктом будет смасштабирована и обрезана
+          по размерам исходной картинки, чтобы использоваться
+          в качестве мульти-цели для преобразования.
+    
+    output_name : str или None
+        имя файла для сохранения. Если не указать расширение,
+        по умолчанию будет использовано PNG. Если указать None,
+        итоговое изображение не будет сохраняться на диск
+    
+    grayscale : [float, float, float]
+        коэффициенты для преобразования в оттенки серого. 
+        По умолчанию установлены наиболее часто используемые
+        для этой цели коэффициенты из стандарта ITU-R BT.709
+    
+    test_mode : bool или float
+        переключатель для тестового режима. В тестовом режиме:
+        - во-первых, размер обрабатываемого изображения
+          сокращается до небольшого разрешения (если передан
+          float, то это значение и берется, если bool - 100);
+        - во-вторых, итоговое изображение не будет никуда
+          сохраняться.
+    """
     # Преобразование коэффициентов учета RGB в вектор-строку
     gs = np.reshape(grayscale, (1, 3))
     gs = gs / gs.sum()
@@ -166,4 +204,59 @@ def transform(image_name,
         print(f'Изображение сохранено в output/{filename}')
         
     return result
-    
+
+
+def color_blurring(image_name, 
+                   blur_factor=0.1,
+                   output_name='output', 
+                   grayscale=[0.2126, 0.7152, 0.0722], 
+                   test_mode=False):
+    """
+    Эффект размытия цветов
+
+    PARAMETERS
+    ----------
+    blur_factor : float
+        коэффициент размытия от 0 до 1 (но можно и больше)
+
+    image_name, output_name, grayscale, test_mode:
+        параметры функции transform()
+    """
+    image = open_img(image_name)
+    resolution = np.sqrt(np.prod(image.size))
+    blur_radius = blur_factor * resolution / 2
+    blured = image.filter(ImageFilter.GaussianBlur(blur_radius))
+    return transform(image_name=blured, 
+                     target=image, 
+                     output_name=output_name, 
+                     grayscale=grayscale, 
+                     test_mode=test_mode)
+
+
+def illumination(image_name,
+                 color=[0, 0, 255],
+                 intensity=0.1,
+                 output_name='output',
+                 test_mode=False):
+    """
+    Эффект цветного освещения
+
+    PARAMETERS
+    ----------
+    color : [int, int, int]
+        цвет освещения в формате RGB от 0 до 255
+        
+    intensity : float
+        интенсивность остальных цветов от 0 до 1
+
+    image_name, output_name, test_mode:
+        параметры функции transform()
+    """
+    image = open_img(image_name)
+    inverted_color = 255 - np.array(color)
+    color = list(np.clip(inverted_color, 1e-10, 255))
+    return transform(image_name=image, 
+                     target=intensity, 
+                     output_name=output_name, 
+                     grayscale=color, 
+                     test_mode=test_mode)
