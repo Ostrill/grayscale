@@ -29,6 +29,23 @@ def prepare_input(img1_path, img2_path):
     return img1, img2
 
 
+def resize_crop(img, h, w):
+    img_w, img_h = img.size
+    ratio = img_w / img_h
+
+    if ratio > w / h:
+        img = img.resize((int(h * ratio), h))
+        crop_x = round(img_w / 2 - w / 2)
+        img = img.crop((crop_x, 0, crop_x + w, img_h))
+    else:
+        img = img.resize((w, int(w / ratio)))
+        crop_y = round(img_h / 2 - h / 2)
+        img = img.crop((0, crop_y, img_w, crop_y + h))
+
+    return img
+        
+
+
 def get_vertices(gs):
     vertices = np.zeros((256, 12, 3))
     gs = np.array(gs).flatten()
@@ -50,16 +67,17 @@ def get_vertices(gs):
     return vertices
 
 
-def transform(image, 
-              target=0.5,
+def transform(image_path, 
+              target=0.2,
               grayscale=[0.2126, 0.7152, 0.0722]):
-    # Масштабирование цветов в диапазон [0, 1]
-    image_np = np.array(image)[..., :3] / 255
-    # Размеры исходного изображения
-    h, w, _ = image_np.shape
     # Преобразование в вектор-строку
     gs = np.reshape(grayscale, (1, 3))
     gs = gs / gs.sum()
+    
+    # Масштабирование цветов RGB в диапазон [0, 1]
+    image_np = np.array(image)[..., :3] / 255
+    # Размеры исходного изображения
+    h, w, _ = image_np.shape
     # Формулирование цели для алгоритма
     if isinstance(target, float):
         t = target
