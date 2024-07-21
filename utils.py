@@ -16,6 +16,21 @@ def resize_crop(img, h, w):
         crop_y = round(new_h / 2 - h / 2)
         img = img.crop((0, crop_y, w, crop_y + h))
     return img
+
+
+def correct_filename(filename, default='jpg'):
+    # Список поддерживаемых расширений
+    supported = {ex[1:] for ex, f 
+                 in Image.registered_extensions().items() 
+                 if f in Image.OPEN}
+    # Разделенное по точкам название файла
+    sep = filename.split('.')
+    if len(sep) == 1 or sep[-1] not in supported:
+        # Если у файла нет расширения или оно неправильное
+        return f'{filename}.{default}'
+    else:
+        # Если с названием файла все в порядке
+        return filename
         
 
 def get_vertices(gs):
@@ -38,15 +53,21 @@ def get_vertices(gs):
     return vertices
 
 
-def transform(image_path, 
+def transform(image_name,
               target=0.2,
-              grayscale=[0.2126, 0.7152, 0.0722]):
+              output_name='output.jpg',
+              grayscale=[0.2126, 0.7152, 0.0722],
+              test_mode=False):
     # Преобразование коэффициентов учета RGB в вектор-строку
     gs = np.reshape(grayscale, (1, 3))
     gs = gs / gs.sum()
     
     # Загрузка и обработка исходного изображения
-    image = Image.open(f'input/{image_path}')
+    image = Image.open(f'input/{image_name}')
+    if test_mode: # Уменьшение картинки для тестового режима
+        new_w = np.sqrt(np.divide(*image.size)) * 100
+        image.thumbnail((new_w, -1))
+        output_name = None
     image_np = np.array(image)[..., :3] / 255
     h, w, _ = image_np.shape
     
@@ -94,7 +115,16 @@ def transform(image_path,
                     np.arange(w)[None, :, None], 
                     np.argmin(_ds, axis=-1)[..., None], 
                     np.arange(3))
-    nc = options[best_indices]
-    
+    result = options[best_indices]
+
     # Итоговый результат
-    return Image.fromarray(np.round(nc * 255).astype('uint8'))
+    result = Image.fromarray(np.round(result * 255).astype('uint8'))
+
+    # Сохранение изображения при необходимости
+    if isinstance(output_name, str):
+        filename = correct_filename(output_name)
+        result.save(f'output/{filename}')
+        print(f'Изображение сохранено в output/{filename}')
+        
+    return result
+    
