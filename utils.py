@@ -55,7 +55,7 @@ def get_vertices(gs):
 
 def transform(image_name,
               target=0.2,
-              output_name='output.jpg',
+              output_name='output',
               grayscale=[0.2126, 0.7152, 0.0722],
               test_mode=False):
     # Преобразование коэффициентов учета RGB в вектор-строку
