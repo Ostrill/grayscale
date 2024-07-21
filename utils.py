@@ -2,49 +2,21 @@ from PIL import Image
 import numpy as np
 
 
-def prepare_input(img1_path, img2_path):
-    img1 = Image.open(img1_path)
-    img2 = Image.open(img2_path)
-    
-    img1_ratio = img1.size[0] / img1.size[1]
-    img2_ratio = img2.size[0] / img2.size[1]
-    
-    if img2_ratio > img1_ratio:
-        img2 = img2.resize((int(img1.size[1] * img2_ratio),
-                            img1.size[1]))
-        crop_x = round(img2.size[0] / 2 - img1.size[0] / 2)
-        img2 = img2.crop((crop_x, 
-                          0, 
-                          crop_x + img1.size[0], 
-                          img2.size[1]))
-    else:
-        img2 = img2.resize((img1.size[0], 
-                            int(img1.size[0] / img2_ratio)))
-        crop_y = round(img2.size[1] / 2 - img1.size[1] / 2)
-        img2 = img2.crop((0,
-                          crop_y, 
-                          img2.size[0], 
-                          crop_y + img1.size[1]))
-        
-    return img1, img2
-
-
 def resize_crop(img, h, w):
     img_w, img_h = img.size
     ratio = img_w / img_h
-
-    if ratio > w / h:
-        img = img.resize((int(h * ratio), h))
-        crop_x = round(img_w / 2 - w / 2)
-        img = img.crop((crop_x, 0, crop_x + w, img_h))
+    if ratio > (w / h):
+        new_w = int(h * ratio)
+        img = img.resize((new_w, h))
+        crop_x = round(new_w / 2 - w / 2)
+        img = img.crop((crop_x, 0, crop_x + w, h))
     else:
-        img = img.resize((w, int(w / ratio)))
-        crop_y = round(img_h / 2 - h / 2)
-        img = img.crop((0, crop_y, img_w, crop_y + h))
-
+        new_h = int(w / ratio)
+        img = img.resize((w, new_h))
+        crop_y = round(new_h / 2 - h / 2)
+        img = img.crop((0, crop_y, w, crop_y + h))
     return img
         
-
 
 def get_vertices(gs):
     vertices = np.zeros((256, 12, 3))
@@ -62,7 +34,6 @@ def get_vertices(gs):
                         vertices[t, index] = np.linalg.solve(A, b)
                     except np.linalg.LinAlgError:
                         vertices[t, index] = np.array([2, 2, 2])
-                        
                     index += 1
     return vertices
 
@@ -70,28 +41,37 @@ def get_vertices(gs):
 def transform(image_path, 
               target=0.2,
               grayscale=[0.2126, 0.7152, 0.0722]):
-    # Преобразование в вектор-строку
+    # Преобразование коэффициентов учета RGB в вектор-строку
     gs = np.reshape(grayscale, (1, 3))
     gs = gs / gs.sum()
     
-    # Масштабирование цветов RGB в диапазон [0, 1]
+    # Загрузка и обработка исходного изображения
+    image = Image.open(f'input/{image_path}')
     image_np = np.array(image)[..., :3] / 255
-    # Размеры исходного изображения
     h, w, _ = image_np.shape
+    
     # Формулирование цели для алгоритма
     if isinstance(target, float):
         t = target
         t_index = np.full((h, w), round(t * 255))
-    else:
+    elif isinstance(target, str):
+        target = Image.open(f'input/{target}')
+        target = resize_crop(target, h, w)
         target_np = np.array(target)[..., :3] / 255
         t = target_np.reshape((h, w, 1, 3)) @ gs.T
         t_index = np.round(t.reshape(h, w) * 255).astype(int)
+    else:
+        assert False, 'Type of target must be int or str!'
+        
     # Массив из цветов исходного изображения
     colors = image_np.reshape((h, w, 1, 3))
+    
     # Идеальные цвета для цели (пересечение Плоскости и нормали к ней)
     ci = gs * (t - colors @ gs.T) / (gs @ gs.T) + colors
+    
     # Точки, полученные пересечением всех пар границ с Плоскостью
     vertices = get_vertices(gs)[t_index]
+    
     # Индексы внутри RGB для рассчетов
     ks = (np.eye(6, k=-1) + np.eye(6))[..., ::2]
     # Границы (правая часть в уравнениях их плоскостей)
@@ -101,6 +81,7 @@ def transform(image_path,
     # Точки, лежащие на пересечениях Плоскости и границ для RGB
     _ksms = (ks[..., None, :] @ ms[..., None]).reshape(6, 1)
     modas = ms * (alphas - ks @ ci.reshape((h, w, 3, 1))) / _ksms + ci
+    
     # Все варианты расположения наилучшей точки
     options = np.concatenate([ci, vertices, modas], axis=-2)
     # Отсеивание точек за пределами 0 и 255
@@ -114,5 +95,6 @@ def transform(image_path,
                     np.argmin(_ds, axis=-1)[..., None], 
                     np.arange(3))
     nc = options[best_indices]
+    
     # Итоговый результат
     return Image.fromarray(np.round(nc * 255).astype('uint8'))
