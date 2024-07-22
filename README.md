@@ -8,7 +8,7 @@
 
 <div style="display: flex; flex-direction: row; flex-wrap: nowrap; flex-flow: row nowrap; justify-content: flex-start; align-items: center; margin: 0 0 1rem 0">
     <img src="assets/original.png" style="height: 8rem;">
-    <div style="font-size: 1.5rem; margin: 0 0.5rem;">→</div>
+    <span style="font-size: 1.5rem; margin: 0 0.5rem;">→</span>
     <img src="assets/grays.png" style="height: 8rem;">
 </div>
 
@@ -16,9 +16,9 @@
 
 <div style="display: flex; flex-direction: row; flex-wrap: nowrap; flex-flow: row nowrap; justify-content: flex-start; align-items: center; margin: 0 0 1rem 0">
     <img src="assets/original.png" style="height: 8rem;">
-    <div style="font-size: 1.5rem; margin: 0 0.5rem;">→</div>
+    <span style="font-size: 1.5rem; margin: 0 0.5rem;">→</span>
     <img src="assets/transform.png" style="height: 8rem;">
-    <div style="font-size: 1.5rem; margin: 0 0.5rem;">→</div>
+    <span style="font-size: 1.5rem; margin: 0 0.5rem;">→</span>
     <img src="assets/empty.png" style="height: 8rem;">
 </div>
 
@@ -39,7 +39,7 @@ $L=0.2126R + 0.7152G + 0.0722B$
 ## Принцип работы
 Для преобразования решается следующая задача:
 
-$
+$$
 \begin{cases}
 c_r R + c_g G + c_b B = t &(1)
 \\
@@ -47,7 +47,7 @@ c_r R + c_g G + c_b B = t &(1)
 \\
 (R-R_0)^2+(G-G_0)^2+(B-B_0)^2 \to min &(3)
 \end{cases}
-$
+$$
 
 где:
 - $(R_0, G_0, B_0)$ - исходный цвет;
@@ -75,3 +75,123 @@ transform('sample.png', target=0.2)
 
 Результат по умолчанию будет сохранен по адресу: "*output/output.png*".
 Больше подробностей в ноутбуке `main.ipynb`.
+
+
+
+# Преобразование цвета
+
+Здесь представлен алгоритм, который позволяет преобразовать цвета изображения таким образом, чтобы при конвертации в режим оттенков серого картинка исчезала, как это показано на примере ниже:
+
+>testtesttesttesttesttesttesttesttesttesttesttest
+
+
+|![](assets/before.png)|![](assets/after.png)|![](assets/grayscale.png)
+|:--------------------:|:-------------------:|:-----------------------:
+|картинка| картинка| skjglsk |
+
+<div style="display: flex; flex-direction: row; flex-wrap: nowrap; flex-flow: row nowrap; justify-content: space-between; align-items: center;">
+  <img src="assets/before.png" width="100" />
+  <span style="color: red;">→ dsf</span>
+  <div>0-</div>
+  <img src="assets/after.png" width="100" /> 
+  <img src="assets/grayscale.png" width="100" />
+</div>
+
+hello slkdfjlkgjd ojg eke
+fgdfklg dflkg elg
+
+![kek](assets/before.png "hello" =20%x) ![ek](assets/after.png "df" =80%x)
+
+
+<table>
+  <tr>
+    <td><img src="assets/after.png" style="height: 50px;"></td>
+    <td style="font-size: 2rem; text-align: center;">&rarr;</td>
+    <td><img src="assets/after.png" style="height: 50px;"></td>
+  </tr>
+</table>
+
+<table>
+  <tr>
+    <td>
+        <img src="assets/after.png" style="height: 50px;">
+        <img src="assets/after.png" style="height: 50px;">
+        <img src="assets/after.png" style="height: 50px;">
+    </td>
+  </tr>
+</table>
+
+<table>
+    <tr>
+        <th>google</th>
+        <th>google</th>
+        <th>google</th>
+    </tr>
+    <tr>
+        <td style="padding: 0; margin: 0;">
+        <!-- <td> -->
+            <img src="assets/before.png" />
+        </td>
+        <td style="padding: 0; margin: 0;">
+        <!-- <td> -->
+            <img src="assets/after.png" />
+        </td>
+        <td style="padding: 0; margin: 0;">
+        <!-- <td> -->
+            <img src="assets/grayscale.png" />
+        </td>
+    </tr>
+</table>
+
+<div style="display: flex;justify-content: center;align-items: center;height: 100vh;margin: 0;">
+    <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
+        <div style="text-align: center;">
+            <div>hello</div>
+            <img src="assets/before.png" />
+        </div>
+        <div style="text-align: center;">
+            <div>hello</div>
+            <img src="assets/after.png" />
+        </div>
+        <div style="text-align: center;">
+            <div>hello</div>
+            <img src="assets/grayscale.png" />
+        </div>
+    <div>
+</div>
+
+hello world
+
+<div style="margin-left: auto; margin-right: auto;  width: 50%; box-sizing: border-box;">
+    <div style="width: 20%; float: left;">
+        <img src="assets/before.png" />
+    </div>
+    <div style="width: 20%; float: left;">
+        <img src="assets/before.png" />
+    </div>
+    <div style="width: 20%; float: left;">
+        <img src="assets/before.png" />
+    </div>
+</div>
+
+
+<hr>
+
+
+
+<div style="display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0;">
+    <div style="display: flex; justify-content: center; align-items: center; gap: 20px;">
+        <div style="text-align: center;">
+            <div>Подпись 1</div>
+            <img src="assets/after.png" alt="Image 1">
+        </div>
+        <div style="text-align: center;">
+            <div>Подпись 2</div>
+            <img src="assets/after.png" alt="Image 2">
+        </div>
+        <div style="text-align: center;">
+            <div>Подпись 3</div>
+            <img src="assets/after.png" alt="Image 3">
+        </div>
+    </div>
+</div>
