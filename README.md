@@ -1,77 +1,30 @@
-# Преобразование цвета в один тон
+# Grayscale equalizer
 
-Представленный алгоритм позволяет трансформировать цвета изображения таким образом, чтобы при конвертации в режим оттенков серого картинка исчезала.
+The presented algorithm allows you to transform the colors of the image so that when converted to grayscale mode, the picture disappears:
 
-<blockquote>
+![example](docs/assets/example.png)
 
-Например, если конвертировать обычное изображение в режим оттенков серого, получится примерно следующее:
-
-<div style="display: flex; flex-direction: row; flex-wrap: nowrap; flex-flow: row nowrap; justify-content: flex-start; align-items: center; margin: 0 0 1rem 0">
-    <img src="assets/original.png" style="height: 8rem;">
-    <span style="font-size: 1.5rem; margin: 0 0.5rem;">→</span>
-    <img src="assets/grays.png" style="height: 8rem;">
-</div>
-
-Но если перед конвертацией в режим оттенков серого применить представленный алгоритм, то получится следующий результат:
-
-<div style="display: flex; flex-direction: row; flex-wrap: nowrap; flex-flow: row nowrap; justify-content: flex-start; align-items: center; margin: 0 0 1rem 0">
-    <img src="assets/original.png" style="height: 8rem;">
-    <span style="font-size: 1.5rem; margin: 0 0.5rem;">→</span>
-    <img src="assets/transform.png" style="height: 8rem;">
-    <span style="font-size: 1.5rem; margin: 0 0.5rem;">→</span>
-    <img src="assets/empty.png" style="height: 8rem;">
-</div>
-
-То есть картинка посередине не может быть конвертирована в режим оттенков серого, потому что вместо ожидаемого результата получается однотонное пустое изображение.
-
-</blockquote>
-
-## Более подробно
-
-Для конвертации цветного изображения с каналами $(R, G, B)$ в режим оттенков серого с одним каналом $(L)$, как правило, используют среднее взвешенное:
-
-$L=0.2126R + 0.7152G + 0.0722B$
-
-Данные коэффициенты, взятые из стандарта ITU-R BT.709, учитывают разную чувствительность человеческого глаза к тем или иным цветам и являются наиболее распространенными для преобразования изображений в режим оттенков серого.
-
-Если каждый пиксель изображения при переводе в режим оттенков серого преобразуется в одно и то же значение, то в некотором смысле данное изображение является однотонным. То есть все его цвета воспринимается человеческим глазом примерно равными по шкале от "темно" до "светло".
-
-## Принцип работы
-Для преобразования решается следующая задача:
-
-$$
-\begin{cases}
-c_r R + c_g G + c_b B = t &(1)
-\\
-0 \le R, G, B \le 255 &(2)
-\\
-(R-R_0)^2+(G-G_0)^2+(B-B_0)^2 \to min &(3)
-\end{cases}
-$$
-
-где:
-- $(R_0, G_0, B_0)$ - исходный цвет;
-- $(R, G, B)$ - итоговый (новый) цвет после преобразования;
-- $(c_r, c_g, c_b)$ - коэффициенты для преобразования в режим оттенков серого, по умолчанию берутся значения $(0.2126, 0.7152, 0.0722)$;
-- $t$ - целевое значение после преобразование в режим оттенков серого.
-
-> То есть необходимо найти такую точку $(R, G, B)$, которая бы лежала на плоскости $(1)$, удовлетворяла ограничениям $(2)$, а также находилась на минимально возможном расстоянии от точки $(R_0, G_0, B_0)$.
-
-Очевидно, что самый короткий путь до плоскости проходит по перпендикуляру к ней. Однако точка, полученная таким образом, хоть и является идеальной с точки зрения расстояния, не всегда удовлетворяет ограничениям $(2)$. В таком случае необходимо найти ближайшую к ней точку, удовлетворяющую ограничениям. Эта точка располагается на границах сечения куба ограничений $(2)$ плоскостью $(1)$. Найденная таким образом точка является ответом.
+ [**→ MORE DETAILS**](https://github.com/Ostrill/grayscale/blob/main/docs/EN/info.md)
 
 
-## Использование
-Для работы алгоритма требуются следующие библиотеки:
-- [NumPy](https://numpy.org/) `v1.26.3` (используется для работы с массивами);
-- [Pillow](https://pillow.readthedocs.io/en/stable/) `v10.2.0` (используется для работы с изображениями).
+## Using
+1. Install required libraries:
+```bash
+pip install numpy==1.26.3
+pip install pillow==10.2.0
+```
 
-Пример преобразования изображения "*sample.png*", лежащего в папке "*input/*":
+2. Download file [`utils.py`](https://github.com/Ostrill/grayscale/blob/main/utils.py). Or copy the entire repository:
+```bash
+git clone https://github.com/Ostrill/grayscale.git
+```
+> `utils.py` is all you need to transform images, so you can rename it as you wish and then use this module.
 
+3. Simple example of using:
 ```Python
 from utils import transform
 
-transform('sample.png', target=0.2)
+transform('example.png', target=0.2)
 ```
 
-Результат по умолчанию будет сохранен по адресу: "*output/output.png*".
-Больше подробностей в ноутбуке `main.ipynb`.
+See [`demo.ipynb`](https://github.com/Ostrill/grayscale/blob/main/docs/EN/demo.ipynb) for more examples.
