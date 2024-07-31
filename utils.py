@@ -50,7 +50,7 @@ def open_img(image_name):
     or as an Image.Image object
     """
     if isinstance(image_name, str):
-        return Image.open(f'input/{image_name}')
+        return Image.open(f'{image_name}')
     elif isinstance(image_name, Image.Image):
         return image_name
     else:
@@ -89,7 +89,7 @@ def get_vertices(grayscale):
 
 def transform(image_name,
               target=0.2,
-              output_name='output',
+              output_name='result',
               grayscale=[0.2126, 0.7152, 0.0722],
               fast_mode=False,
               test_mode=False):
@@ -208,15 +208,15 @@ def transform(image_name,
     # Saving the result if necessary
     if isinstance(output_name, str):
         filename = correct_filename(output_name)
-        result.save(f'output/{filename}')
-        print(f'The result was saved in output/{filename}')
+        result.save(f'{filename}')
+        print(f'The result was saved in {filename}')
         
     return result
 
 
 def color_blurring(image_name, 
                    blur_factor=0.1,
-                   output_name='output', 
+                   output_name='result', 
                    grayscale=[0.2126, 0.7152, 0.0722],
                    fast_mode=False, 
                    test_mode=False):
@@ -246,7 +246,7 @@ def color_blurring(image_name,
 def illumination(image_name,
                  color=[0, 0, 255],
                  intensity=0.1,
-                 output_name='output',
+                 output_name='result',
                  fast_mode=False, 
                  test_mode=False):
     """
