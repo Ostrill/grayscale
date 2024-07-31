@@ -4,7 +4,7 @@ The presented algorithm allows you to transform the colors of the image so that 
 
 ![example](docs/assets/example.jpg)
 
- [MORE DETAILS...](https://github.com/Ostrill/grayscale/blob/main/docs/EN/info.md)
+[MORE DETAILS...](docs/EN/info.md)
 
 
 ## Using
@@ -27,4 +27,4 @@ from utils import transform
 transform('example.png', target=0.2)
 ```
 
-See [`demo.ipynb`](https://github.com/Ostrill/grayscale/blob/main/docs/EN/demo.ipynb) for more examples.
+See [`demo.ipynb`](docs/EN/demo.ipynb) for more examples.
