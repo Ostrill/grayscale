@@ -2,7 +2,7 @@
 
 The presented algorithm allows you to transform the colors of the image so that when converted to grayscale mode, the picture disappears:
 
-![example](docs/assets/example.png)
+![example](docs/assets/example.jpg)
 
  [MORE DETAILS...](https://github.com/Ostrill/grayscale/blob/main/docs/EN/info.md)
 
