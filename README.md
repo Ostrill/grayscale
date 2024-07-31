@@ -4,7 +4,7 @@ The presented algorithm allows you to transform the colors of the image so that 
 
 ![example](docs/assets/example.png)
 
- [**→ MORE DETAILS**](https://github.com/Ostrill/grayscale/blob/main/docs/EN/info.md)
+ [MORE DETAILS...](https://github.com/Ostrill/grayscale/blob/main/docs/EN/info.md)
 
 
 ## Using
