@@ -1,9 +1,9 @@
 <h1 align="right">
 <code>🇺🇸</code> 
 <a href="../RU/info.md">🇷🇺</a>
+<br>
+<div align="left">Equalizing the tone of image using grayscale conversion</div>
 </h1>
-
-# Equalizing the tone of image using grayscale conversion
 
 The presented algorithm allows you to transform the colors of the image so that when converted to grayscale mode, the picture disappears.
 
