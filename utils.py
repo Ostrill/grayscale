@@ -33,7 +33,7 @@ def correct_filename(filename, default='png'):
     # Set of all supported by PIL extensions
     supported = {ex[1:] for ex, f 
                  in Image.registered_extensions().items() 
-                 if f in Image.OPEN}
+                 if f in Image.SAVE}
 
     sep = filename.split('.')
     if len(sep) == 1 or sep[-1] not in supported:
