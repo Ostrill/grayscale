@@ -1,5 +1,5 @@
 <h1 align="right">
-<a href="../EN/info.md">🇺🇸</a> 
+<a href="EN.md">🇺🇸</a> 
 <code>🇷🇺</code>
 <br>
 <div align="left">Выравнивание тона изображения по оттенкам серого</div>

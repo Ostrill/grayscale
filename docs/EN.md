@@ -1,6 +1,6 @@
 <h1 align="right">
 <code>🇺🇸</code> 
-<a href="../RU/info.md">🇷🇺</a>
+<a href="RU.md">🇷🇺</a>
 <br>
 <div align="left">Equalizing the tone of image using grayscale conversion</div>
 </h1>
