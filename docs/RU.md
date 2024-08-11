@@ -140,3 +140,7 @@ illumination(image_name='frog.png', # путь к исходному изобр�
 </details>
 </blockquote>
 </details>
+
+## Галерея
+
+![gallery](assets/gallery.png)

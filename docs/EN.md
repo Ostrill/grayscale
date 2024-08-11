@@ -140,3 +140,7 @@ The result:
 </details>
 </blockquote>
 </details>
+
+## Gallery
+
+![gallery](assets/gallery.png)
