@@ -51,4 +51,92 @@ where:
 Obviously, the shortest path to the plane is along the perpendicular to it. However, the point obtained in this way, although ideal in terms of distance, does not always satisfy the constraints $(2)$. In this case, it is necessary to find the nearest from ideal point satisfying the constraints. This point is located on the boundaries of the cross-section of the cube of constraints $(2)$ by the plane $(1)$. The point thus found is the answer.
 
 ## Examples of use
-In the [`demo.ipynb`](demo.ipynb) notebook, you can see examples of using both the algorithm itself and various effects based on it.
+
+<details>
+<summary>&nbsp;<strong>Grayscale equalizing with main method <code>transform()</code></strong></summary>
+<blockquote></blockquote>
+<blockquote>
+The <code>transform()</code> function transforms an image so that when it is converted to grayscale mode, each of its pixels is colored the same color. For example:<br><br>
+
+```Python
+from utils import transform
+
+transform(image_name='frog.png', # path to source image
+          target=0.15,           # target value for grayscale mode
+          test_mode=200)         # image resolution (for the test mode)
+```
+The result:
+
+![transform](assets/transform.png)
+
+<details>
+<summary>&nbsp;Function parameters in details:</summary>
+<blockquote></blockquote>
+
+- <kbd>image_name</kbd> - path to source image;
+- <kbd>target</kbd> - the target of transformation (the value of the pixel in grayscale mode) as a float from 0 to 1. Or you can specify path to the another image which will be used as multi target;
+- <kbd>output_name</kbd> - path to save the result. If you specify *None*, file will not be saved;
+- <kbd>grayscale</kbd> - coefficients for conversion to grayscale. The default values are (0.2126, 0.7152, 0.0722).
+- <kbd>fast_mode</kbd> - fast mode is about twice as fast as normal mode, but produces lower quality results (but this is often hard to see). Use *True* of *False* to toggle fast mode (default value is *False*);
+- <kbd>test_mode</kbd> - in test mode, the source image is reduced to the specified resolution (*True* equals to 100) and the result is not saved anywhere. It is useful for checking different parameters  before the main image transformation. The default value is *False*.
+</details>
+</blockquote>
+</details>
+
+<details>
+<summary>&nbsp;<strong>Color blur effect with <code>color_blurring()</code></strong></summary>
+<blockquote></blockquote>
+<blockquote>
+The <code>color_blurring()</code> function blurs the colors of the image, creating something like glowing effect. To create this effect, the <code>transform()</code> function is called, into which a Gaussian blurred version of the source image is passed as the source image, and the source image itself is passed as the target. For example:<br><br>
+
+```Python
+from utils import color_blurring
+          
+color_blurring(image_name='frog.png', # path to source image
+               blur_factor=0.3,       # blurring factor
+               test_mode=200)         # image resolution (for the test mode)
+```
+The result:
+
+![color_blurring](assets/color_blurring.png)
+
+<details>
+<summary>&nbsp;Function parameters in details:</summary>
+<blockquote></blockquote>
+
+- <kbd>image_name</kbd> - path to source image;
+- <kbd>blur_factor</kbd> - float value from 0 to 1;
+- <kbd>output_name</kbd>, <kbd>grayscale</kbd>, <kbd>fast_mode</kbd>, <kbd>test_mode</kbd> - `transform()` function parameters.
+</details>
+</blockquote>
+</details>
+
+<details>
+<summary>&nbsp;<strong>Color lightning effect with <code>illumination()</code></strong></summary>
+<blockquote></blockquote>
+<blockquote>
+The <code>illumination()</code> function simulates color lighting (but does it crookedly in places). To create this effect, the <code>transform()</code> function is called, to which grayscale coefficients are passed that make all colors of the source image change in such a spatial direction that the transmitted color will not change. For example, if you specify color (255, 0, 0), then the red channel will not participate in the transformation at all, but the other channels will be corrected. The intensity parameter sets the degree of taking into account all other (changeable) colors. The lower this parameter is, the lower (darker) values will be converted to colors other than the illumination color. To summarize the above, <code>illumination()</code> with a low intensity value reduces the influence of all colors except the specified one. A high intensity value increases the effect of all other colors. For example:<br><br>
+
+```Python
+from utils import illumination
+
+illumination(image_name='frog.png', # path to source image
+             color=[255, 0, 0],     # color of lightning
+             intensity=0.1,         # factor of changeable of other colors
+             test_mode=200)         # image resolution (for the test mode)
+```
+The result:
+
+![illumination](assets/illumination.png)
+
+<details>
+<summary>&nbsp;Function parameters in details:</summary>
+<blockquote></blockquote>
+
+- <kbd>image_name</kbd> - path to source image;
+- <kbd>intensity</kbd> - float value from 0 to 1;
+- <kbd>color</kbd> - lightning color as \[R, G, B\], each value is from 0 to 255;
+- <kbd>output_name</kbd>, <kbd>grayscale</kbd>, <kbd>fast_mode</kbd>, <kbd>test_mode</kbd> - `transform()` function parameters.
+</details>
+</blockquote>
+</details>
