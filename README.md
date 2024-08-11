@@ -2,7 +2,7 @@
 
 The presented algorithm allows you to transform the colors of the image so that when converted to grayscale mode, the picture disappears:
 
-![example](docs/assets/example.jpg)
+![example](docs/assets/example.png)
 
 ## Using
 1. Install required libraries:

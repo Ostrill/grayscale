@@ -9,11 +9,11 @@ The presented algorithm allows you to transform the colors of the image so that 
 
 > For example, if you convert some image to grayscale, you get something like this:
 > 
-> ![grayscale](assets/grayscale.jpg)
+> ![grayscale](assets/grayscale.png)
 > 
 > But if you apply presented algorithm before converting to grayscale, you get this:
 > 
-> ![example](assets/example.jpg)
+> ![example](assets/example.png)
 > 
 > Image in the middle cannot be converted to grayscale, because you will get a blank gray image instead of the expected result.
 
