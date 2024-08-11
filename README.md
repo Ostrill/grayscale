@@ -4,9 +4,6 @@ The presented algorithm allows you to transform the colors of the image so that 
 
 ![example](docs/assets/example.jpg)
 
-[MORE DETAILS...](docs/EN/info.md)
-
-
 ## Using
 1. Install required libraries:
 ```bash
@@ -27,4 +24,4 @@ from utils import transform
 transform('example.png', target=0.2)
 ```
 
-See [`demo.ipynb`](docs/EN/demo.ipynb) for more examples.
+> See [`documentation`](docs/EN.md) for more information and examples.
